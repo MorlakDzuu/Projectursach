@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewData["Title"] = "CompanyPage";
+    Project.Outputs.CompanyOutput company = ViewBag.Company;
+    List<Project.Outputs.ServiceOutput> services = ViewBag.Services;
+}
+
+    <div class="card mb-3">
+        <img class="card-img-top" src="@company.Pic" style="max-height: 200px;" alt="Card image cap">
+        <div class="card-body">
+            <h5 class="card-title">@company.Name</h5>
+            <p class="card-text">@company.Description</p>
+        </div>
+        <button type="button" id="editCompanyButton" class="btn btn-outline-danger">Изменить</button>
+    </div>
+
+<h2>Услуги</h2>
+
+@{
+    foreach (Project.Outputs.ServiceOutput service in services)
+    {
+        <div class="card mb-3" id="@service.Id" style="cursor: pointer; ">
+            <div class="card-body">
+                <h5 class="card-title">@service.Name</h5>
+                <p class="card-text">Описание: @service.Description</p>
+                <p>Адрес: @service.Address</p>
+                <p>
+                    Дни недели:
+                    @{
+                        foreach (string day in service.Days)
+                        {
+                            <span>@day</span>
+                        }
+                    }
+                </p>
+                <p>
+                    Время оказания услуги:
+                    @{
+                        foreach (string time in service.Times)
+                        {
+                            <span>@time</span>
+                        }
+                    }
+                </p>
+                <p>Длительность по времени: @service.Long_time</p>
+                <p>Цена: @service.Price</p>
+            </div>
+        </div>
+        <script>
+            var serv = document.getElementById(@service.Id);
+            serv.addEventListener('click', e => document.location.href = '/Company/UpdateService/' + @service.Id);
+        </script>
+    }
+}
+
+<button id="addService" type="button" class="btn btn-primary btn-lg">Добавить услугу</button>
+
+
+
+<script>
+    var addServiceButton = document.getElementById("addService");
+    addServiceButton.addEventListener('click', e => document.location.href = "/Company/AddService");
+
+    var editCompanyButton = document.getElementById("editCompanyButton");
+    editCompanyButton.addEventListener('click', e => document.location.href = "/Company/UpdateCompany");
+</script>

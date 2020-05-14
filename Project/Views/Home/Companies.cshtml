@@ -1,0 +1,21 @@
+﻿
+@{
+    Layout = "_Layout";
+    List<Project.Outputs.CompanyOutput> companies = (new Project.Services.DbService()).GetCompanies();
+}
+        <h1>Компании</h1>
+            @{
+                foreach (Project.Outputs.CompanyOutput company in companies)
+                {
+                <div class="card mb-3" id="@company.Id" style="cursor: pointer;">
+                    <img class="card-img-top" src="@company.Pic" style="max-height: 200px;" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">@company.Name</h5>
+                        <p class="card-text">@company.Description</p>
+                    </div>
+                </div>
+                <script>
+                    document.getElementById(@company.Id).addEventListener('click', e => document.location.href = "/Home/CompanyPage/" + @company.Id);
+                </script>
+                }
+            }

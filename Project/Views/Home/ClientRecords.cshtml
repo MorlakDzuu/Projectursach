@@ -1,0 +1,65 @@
+﻿
+@{
+    List<Project.Outputs.RecordOutputClient> records = ViewBag.Records;
+    ViewData["Title"] = "ClientRecords";
+}
+
+<h1>Ваши записи</h1>
+
+@{
+    for (var i = 0; i < records.Count; i++)
+    {
+        <div id="card_@i" class="card border-dark mb-3">
+            <div class="card-header bg-transparent border-success">@records[i].CompanyName</div>
+            <div class="card-body text-dark row">
+                <div class="col-2">@records[i].ServiceName</div>
+                <div class="col-2">@records[i].Address</div>
+                <div class="col-2">@records[i].Date</div>
+                <div class="col-2">@records[i].Time</div>
+                <div class="col-2"></div>
+                <div class="col-2">
+                    <button id="@i" class="btn btn-outline-danger">Отменить</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            async function deleteRecord() {
+                 const formData = new FormData();
+                var id = @records[i].Id;
+
+                // отправляет запрос и получаем ответ
+                const response = await fetch("/Home/DeleteRecord/" + id, {
+                    method: "POST",
+                    headers: { "Accept": "application/json" },
+                    body: formData
+                });
+                // получаем данные
+                const data = await response.json();
+
+                // если запрос прошел нормально
+                if (response.ok === true) {
+                    if (data.result == "success") {
+                        document.getElementById("card_" + @i).remove();
+                        var ids = Cookies.get("recordsIds").trim();
+                        var idsArray = ids.split(' ');
+                        var idsNew = '';
+                        for (var i = 0; i < idsArray.length; i++) {
+                            if (parseInt(idsArray[i]) != id) {
+                                idsNew += idsArray[i] + ' ';
+                            }
+                        }
+                        Cookies.set("recordsIds", idsNew)
+                    }
+                }
+                else {
+                    // если произошла ошибка, из errorText получаем текст ошибки
+                    console.log("Error: ", response.status, data.errorText);
+                }
+            }
+            document.getElementById(@i).addEventListener('click', function (e) {
+                deleteRecord();
+            });
+        </script>
+    }
+}

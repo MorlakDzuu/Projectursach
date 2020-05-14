@@ -1,0 +1,67 @@
+﻿
+@{
+    int number = ViewBag.Number;
+    List<Project.Outputs.RecordOutputAdmin> records = ViewBag.Records;
+    ViewData["Title"] = "Records";
+}
+
+<div class="row">
+    <div class="col-2">
+        <h1>Records</h1>
+    </div>
+    <div class="col-8">
+        <form id="searchForm" class="form-inline" method="get" action="/Company/Records">
+            <input id="inputSearch" onchange="pasteAction(event);" class="form-control mr-sm-2" type="search" placeholder="Поиск" aria-label="Поиск">
+            <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Поиск</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-2">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link" id="navLink1" asp-controller="Company" asp-action="Records">Все записи</a>
+            <a class="nav-link" id="navLink2" asp-controller="Company" asp-action="RecordsToday">Записи на сегодня</a>
+            <a class="nav-link" id="navLink3" asp-controller="Company" asp-action="RecordsTomorrow">Записи на завтра</a>
+        </div>
+    </div>
+    <div class="col-10">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Номер телефона</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Время</th>
+                    <th scope="col">Дата</th>
+                    <th scope="col">Название услуги</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    for (int i = 1; i <= records.Count; i++)
+                    {
+                        <tr>
+                            <th scope="row">@i</th>
+                            <td>@records[i - 1].Name</td>
+                            <td>@records[i - 1].Phone</td>
+                            <td>@records[i - 1].Email</td>
+                            <td>@records[i - 1].Time</td>
+                            <td>@records[i - 1].Date</td>
+                            <td>@records[i - 1].RecordName</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    document.getElementById('navLink' + @number).classList.add("active");
+
+    function pasteAction(event) {
+        var search = document.getElementById('inputSearch').value
+        document.getElementById('searchForm').action = "/Company/RecordsSearch/" + search;
+    }
+</script>

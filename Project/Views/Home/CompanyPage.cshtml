@@ -1,0 +1,42 @@
+﻿
+@{
+    Project.Outputs.CompanyOutput company = ViewBag.Company;
+    List<Project.Outputs.ServiceOutput> services = ViewBag.Services;
+    ViewData["Title"] = "CompanyPage";
+}
+
+<div class="card mb-3">
+    <img class="card-img-top" src="@company.Pic" style="max-height: 200px;" alt="Card image cap">
+    <div class="card-body">
+        <h5 class="card-title">@company.Name</h5>
+        <p class="card-text">@company.Description</p>
+        <h6>Адреса</h6>
+        @{
+            foreach (string address in company.Address)
+            {
+                <p>@address</p>
+            }
+        }
+        <h6>Номер телефона: <span>@company.Phone</span></h6>
+    </div>
+</div>
+<h2>Услуги</h2>
+
+@{
+    foreach (Project.Outputs.ServiceOutput service in services)
+    {
+        <div class="card text-center mt-3">
+            <div class="card-header">
+                @service.Address
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">@service.Name</h5>
+                <p class="card-text">@service.Description</p>
+                <a href="/Home/MakeRecord/@service.Id" class="btn btn-primary">Записаться</a>
+            </div>
+            <div class="card-footer text-muted">
+                @service.Price руб
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,128 @@
+﻿
+@{
+    Layout = "_Layout";
+}
+    <form>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputEmail">Email</label>
+                <input name="email" type="email" class="form-control" id="inputEmail" placeholder="Email">
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="inputPassword">Пароль</label>
+                    <input name="password" type="password" class="form-control" id="inputPassword" placeholder="Пароль">
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword">Повторите пароль</label>
+                    <input name="passwordRepeat" type="password" class="form-control" id="inputPasswordRepeat" placeholder="Повторите пароль">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputName">Название компании</label>
+            <input name="name" type="text" class="form-control" id="inputName" placeholder="Название компании">
+        </div>
+        <div class="form-group">
+            <label for="inputPhone">Номер телефона</label>
+            <input name="phone" type="text" class="form-control" id="inputPhone" placeholder="+71111111111">
+        </div>
+        <div id="addresses">
+            <div class="form-group">
+                <label for="inputAddress 1">Адреса</label>
+                <input name="address" type="text" class="form-control" id="inputAddress 1" placeholder="Проспект Ленина дом 8">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6"><button type="button" id="addAddress" class="btn btn-primary col-12">Добавить адрес</button></div>
+            <div class="col-6"><button type="button" id="cancelAddress" class="btn btn-danger col-12">Отменить последние</button></div>
+        </div>
+        <div class="form-group">
+            <label for="inputDescription">Описание компании</label>
+            <textarea name="description" class="form-control" id="inputDescription" rows="3"></textarea>
+        </div>
+        <div class="custom-file">
+            <input name="pic" type="file" class="custom-file-input" accept="image/*" id="customFile">
+            <label class="custom-file-label" for="customFile">Выберите фото</label>
+        </div>
+        <button type="submit" id="submitButton" class="btn btn-primary mt-3">Отправить</button>
+    </form>
+    <script>
+        var countAddress = 1;
+        var addTimeButton = document.getElementById('addAddress');
+        var times = document.getElementById('addresses');
+
+        addTimeButton.addEventListener('click', function () {
+            countAddress++;
+            var div = document.createElement('div');
+            div.id = "inputAddressBlock " + countAddress;
+            div.innerHTML = '<div class="form-group">' +
+                '<input name="address" type="text" class="form-control" id="inputAddress ' + countAddress + '" placeholder="1234 Main St">' +
+                '</div>';
+            times.appendChild(div);
+        });
+
+        var cancelTimeButton = document.getElementById('cancelAddress');
+        cancelTimeButton.addEventListener('click', function () {
+            if (countAddress > 1) {
+                document.getElementById('inputAddressBlock ' + countAddress).remove();
+                countAddress--;
+            }
+        });
+
+        document.getElementById('submitButton').addEventListener('click', e => {
+            e.preventDefault();
+            registration();
+        });
+
+        function arePasswordsEqual() {
+            if (document.getElementById("inputPassword").value == document.getElementById("inputPasswordRepeat").value)
+                return true;
+            return false;
+        }
+
+        async function registration() {
+            if (!arePasswordsEqual()) {
+                alert('Пароли не совпадают');
+                return;
+            }
+            // получаем данные формы и фомируем объект для отправки
+            const formData = new FormData();
+            //formData.append("grant_type", "password");
+            formData.append("email", document.getElementById("inputEmail").value);
+            formData.append("password", document.getElementById("inputPassword").value);
+            formData.append("name", document.getElementById("inputName").value);
+            formData.append("phone", document.getElementById("inputPhone").value);
+            formData.append("description", document.getElementById("inputDescription").value);
+            formData.append("pic", document.getElementById("customFile").files[0]);
+ 
+            var addresses = '';
+            for (var i = 1; i <= countAddress; i++) {
+                addresses += document.getElementById('inputAddress ' + i).value + ';';
+            }
+
+            formData.append("address", addresses);
+
+
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/register", {
+                method: "POST",
+                headers: { "Accept": "application/json" },
+                body: formData,
+            });
+            // получаем данные
+            const data = await response.json();
+
+            // если запрос прошел нормально
+            if (response.ok) {
+                if (data.result.toString() == "success")
+                    document.location.href = "/Account/Login";
+                else
+                    alert("Пользователь с таким логином уже существует!")
+            }
+            else {
+                // если произошла ошибка, из errorText получаем текст ошибки
+                console.log("Error: ", response.status, data.errorText);
+            }
+        };
+    </script>

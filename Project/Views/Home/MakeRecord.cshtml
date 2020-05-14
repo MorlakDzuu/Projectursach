@@ -1,0 +1,120 @@
+﻿
+@{
+    Project.Outputs.ServiceOutput service = ViewBag.Service;
+    ViewData["Title"] = "MakeRocord";
+}
+
+    <form>
+        <div class="form-group">
+            <label for="inputAddress">Ваше имя</label>
+            <input type="text" class="form-control" id="inputName" placeholder="ФИО">
+        </div>
+        <div class="form-group">
+            <label for="inputEmail4">Email</label>
+            <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+        </div>
+        <div class="form-group">
+            <label for="inputAddress">Номер телефона</label>
+            <input type="text" class="form-control" id="inputPhone" placeholder="Номер телефона">
+        </div>
+        <div class="form-group row">
+            <label for="example-date-input" class="col-2 col-form-label">Дата</label>
+            <div class="col-10">
+                <input id="inputDate" class="form-control" type="date" onchange="getTimes(event);">
+            </div>
+        </div>
+        <div class="form-group" id="times"></div>
+        <button id="submitButton" type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+
+    <script>
+        document.getElementById('submitButton').addEventListener('click', e => {
+            e.preventDefault();
+            if (timeStatus) {
+                sendRecord();
+            } else {
+                alert('Записаться на эту дату возможности нет');
+            }
+        }); 
+
+        var timeStatus = false;
+        async function getTimes(event) {
+            // получаем данные формы и фомируем объект для отправки
+            const formData = new FormData();
+            formData.append("date", document.getElementById("inputDate").value);
+
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/Home/GetTimes/" + @service.Id, {
+                method: "POST",
+                headers: { "Accept": "application/json" },
+                body: formData
+            });
+            // получаем данные
+            const data = await response.json();
+
+            // если запрос прошел нормально
+            if (response.ok === true) {
+                if (data.result == "success") {
+                    pasteTime(data.times);
+                } else {
+                    timeStatus = false;
+                }
+            }
+            else {
+                timeStatus = false;
+                // если произошла ошибка, из errorText получаем текст ошибки
+                console.log("Error: ", response.status, data.errorText);
+            }
+        }
+
+        async function sendRecord(event) {
+            // получаем данные формы и фомируем объект для отправки
+            const formData = new FormData();
+            formData.append("date", document.getElementById("inputDate").value);
+            formData.append("name", document.getElementById("inputName").value);
+            formData.append("email", document.getElementById("inputEmail").value);
+            formData.append("phone", document.getElementById("inputPhone").value);
+            formData.append("time", document.getElementById("inputTimes").value);
+            formData.append("service_id", @service.Id);
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/Home/AddRecord", {
+                method: "POST",
+                headers: { "Accept": "application/json" },
+                body: formData
+            });
+            // получаем данные
+            const data = await response.json();
+
+            // если запрос прошел нормально
+            if (response.ok === true) {
+                if (data.result == "success") {
+                    var ids = Cookies.get('recordsIds');
+                    if (ids != undefined) {
+                        Cookies.set('recordsIds', ids + data.record_id + ' ');
+                    } else {
+                        Cookies.set('recordsIds', data.record_id + ' ');
+                    }
+                    document.location.href = "/Home";
+                } else {
+                    alert('Не удалось совершить запись!');
+                }
+            }
+            else {
+                // если произошла ошибка, из errorText получаем текст ошибки
+                console.log("Error: ", response.status, data.errorText);
+            }
+        }
+
+        function pasteTime(timesArray) {
+            console.log(timesArray.length);
+            if (timesArray.length == 0) {
+                timeStatus = false;
+                return;
+            }
+            timeStatus = true;
+            document.getElementById('times').innerHTML = '<select id="inputTimes" name="time" class="custom-select mr-sm-2"></select>';
+            for (var i = 0; i < timesArray.length; i++) {
+                document.getElementById('inputTimes').innerHTML += '<option value="' + timesArray[i] + '">' + timesArray[i] + '</option>';
+            }
+        }
+    </script>

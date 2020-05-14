@@ -1,0 +1,161 @@
+﻿
+@{
+    List<string> addresses = ViewBag.Addresses;
+    ViewData["Title"] = "AddService";
+}
+
+<form method="post" action="/register" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="inputName">Название</label>
+        <input name="name" type="text" class="form-control" id="inputName" placeholder="Company name">
+    </div>
+    <select id="inputAddress" name="address" class="custom-select mr-sm-2">
+        @{
+            foreach (string address in addresses)
+            {
+                <option value="@address">@address</option>
+            }
+        }
+    </select>
+    <div class="form-group">
+        <label for="inputDescription">Описание услуги</label>
+        <textarea name="description" class="form-control" id="inputDescription" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="inputAddress">Цена в рублях</label>
+        <input name="price" type="number" class="form-control" id="inputPrice" placeholder="">
+    </div>
+    <div class="form-group">
+        <label for="inputLongTime">Длительность оказания услуги (в минутах)</label>
+        <input name="long_time" type="number" class="form-control" id="inputLongTime" placeholder="">
+    </div>
+    <div id="times">    
+        <div class="form-group row">
+            <label for="example-time-input" class="col-2 col-form-label">Time</label>
+            <div class="col-10">
+                <input class="form-control" type="time" value="13:45" id="inputTime1">
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-2"></div>
+        <div class="col-5"><button type="button" id="addTime" class="btn btn-primary col-12">Добавить время оказания услуги</button></div>
+        <div class="col-5"><button type="button" id="cancelTime" class="btn btn-danger col-12">Отменить последние</button></div>
+    </div>
+    <div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="Monday">Понедельник
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="Tuesday">Вторник
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="Wednesday">Среда
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox4" value="Thursday">Четверг
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox5" value="Friday">Пятница
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox6" value="Saturday">Суббота
+            </label>
+        </div>
+        <div class="form-check form-check-inline">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox7" value="Sunday">Воскресенье
+            </label>
+        </div>
+    </div>
+    <button type="submit" id="addService" class="btn btn-primary mt-3">Добавить услугу</button>
+</form>
+
+<script>
+    var times = document.getElementById('times');
+    var countTimes = 1;
+
+    var cancelTimeButton = document.getElementById('cancelTime');
+    cancelTimeButton.addEventListener('click', function () {
+        if (countTimes > 1) {
+            document.getElementById('inputTimeBlock' + countTimes).remove();
+            countTimes--;
+        }
+    });
+
+    var addTimeButton = document.getElementById('addTime');
+    addTimeButton.addEventListener('click', function () {
+        countTimes++;
+        var div = document.createElement('div');
+        div.innerHTML = '<div id="inputTimeBlock' + countTimes + '" class="form-group row">' +
+            '<div class="col-2"></div>' +
+            '<div class="col-10">' +
+            '<input class="form-control" type="time" value="13:45" id="inputTime' + countTimes + '">' +
+            '</div>' +
+            '</div>';
+        times.appendChild(div);
+    });
+
+    document.getElementById('addService').addEventListener('click', e => {
+        e.preventDefault();
+        addService();
+    });
+    async function addService() {
+
+        // получаем данные формы и фомируем объект для отправки
+        const formData = new FormData();
+        formData.append("name", document.getElementById("inputName").value);
+        formData.append("description", document.getElementById("inputDescription").value);
+        formData.append("address", document.getElementById("inputAddress").value);
+        formData.append("price", document.getElementById("inputPrice").value);
+        formData.append("long_time", document.getElementById("inputLongTime").value);
+
+        var timesList = '';
+        for (var i = 1; i <= countTimes; i++) {
+            timesList += document.getElementById('inputTime' + i.toString()).value.toString() + ';';
+        }
+        formData.append("times", timesList);
+
+        var days = '';
+        for (var i = 1; i < 8; i++) {
+            var item = document.getElementById('inlineCheckbox' + i);
+            if (item.checked)
+                days += item.value + ';';
+        }
+        formData.append("days", days);
+
+
+        // отправляет запрос и получаем ответ
+        const response = await fetch("/Company/AddService", {
+        method: "POST",
+            headers: {"Accept": "application/json" },
+            body: formData
+        });
+        // получаем данные
+        const data = await response.json(); 
+
+        // если запрос прошел нормально
+        if (response.ok) {
+            if (data.result == "success") {
+                document.location.href = "/Company/CompanyPage";
+            } else {
+                alert("Неудачная попытка");
+            }
+        }
+        else {
+        // если произошла ошибка, из errorText получаем текст ошибки
+        console.log("Error: ", response.status, data.errorText);
+        }
+    };
+</script>

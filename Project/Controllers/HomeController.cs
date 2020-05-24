@@ -61,7 +61,7 @@ namespace Project.Controllers
                     DateTime dateDT = DateTime.Parse(date);
                     if ((dateDT.CompareTo(DateTime.Now) > 0) || (dateDT.Equals(DateTime.Now.Date)))
                     {
-                        if (service.Days.ToList().Contains(dateDT.DayOfWeek.ToString()))
+                        if (service.Days.ToList().Contains(dateDT.DayOfWeek.ToString()) && (!service.DaysOff.ToList().Contains(DateTime.Parse(date).ToString("dd-MM-yyyy"))) && (DateTime.Parse(service.EndDate).CompareTo(dateDT) > 0))
                         {
                             return Json(new
                             {

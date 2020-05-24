@@ -52,7 +52,6 @@ namespace Project.Controllers
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
             HttpContext.Session.SetString("JWToken", encodedJwt);
-
             var response = new
             {
                 access_token = encodedJwt
@@ -82,7 +81,7 @@ namespace Project.Controllers
         }
 
         [HttpPost("/register")]
-        public async Task<IActionResult> RegisterAsync(string name, string phone, string email, string address, string description, IFormFile pic, string password)
+        public async Task<IActionResult> Register(string name, string phone, string email, string address, string description, IFormFile pic, string password)
         {
             if (db.GetCompanyByEmail(email) is null)
             {
@@ -100,7 +99,8 @@ namespace Project.Controllers
                 {
                     addressArray = address.Substring(0, address.Length - 1).Split(';');
                 }
-                db.AddCompany(name, phone, email, addressArray, description, filePath, Convert.ToBase64String(PasswordService.HashPassword(password, RandomNumberGenerator.Create())), "company");
+                db.AddCompany(name, phone, email, addressArray, description, filePath, 
+                    Convert.ToBase64String(PasswordService.HashPassword(password, RandomNumberGenerator.Create())), "company");
                 return Json(new { Result = "success" });
             }
             return Json(new { Result = "failed" });

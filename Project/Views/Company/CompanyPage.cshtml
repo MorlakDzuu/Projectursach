@@ -27,18 +27,8 @@
                 <p>
                     Дни недели:
                     @{
-                        foreach (string day in service.Days)
-                        {
+                        foreach (string day in service.Days) { 
                             <span>@day</span>
-                        }
-                    }
-                </p>
-                <p>
-                    Время оказания услуги:
-                    @{
-                        foreach (string time in service.Times)
-                        {
-                            <span>@time</span>
                         }
                     }
                 </p>

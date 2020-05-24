@@ -14,5 +14,6 @@ namespace Project.Models
         public string Description { get; set; }
         public int Long_time { get; set; }
         public int Address_id { get; set; }
+        public string EndDate { get; set; }
     }
 }

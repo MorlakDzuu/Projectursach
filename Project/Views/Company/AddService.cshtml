@@ -4,113 +4,175 @@
     ViewData["Title"] = "AddService";
 }
 
-<form method="post" action="/register" enctype="multipart/form-data">
-    <div class="form-group">
-        <label for="inputName">Название</label>
-        <input name="name" type="text" class="form-control" id="inputName" placeholder="Company name">
-    </div>
-    <select id="inputAddress" name="address" class="custom-select mr-sm-2">
-        @{
-            foreach (string address in addresses)
-            {
-                <option value="@address">@address</option>
+    <form method="post" action="/register" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="inputName">Название</label>
+            <input name="name" type="text" class="form-control" id="inputName" placeholder="Company name">
+        </div>
+        <select id="inputAddress" name="address" class="custom-select mr-sm-2">
+            @{
+                foreach (string address in addresses)
+                {
+                    <option value="@address">@address</option>
+                }
             }
-        }
-    </select>
-    <div class="form-group">
-        <label for="inputDescription">Описание услуги</label>
-        <textarea name="description" class="form-control" id="inputDescription" rows="3"></textarea>
-    </div>
-    <div class="form-group">
-        <label for="inputAddress">Цена в рублях</label>
-        <input name="price" type="number" class="form-control" id="inputPrice" placeholder="">
-    </div>
-    <div class="form-group">
-        <label for="inputLongTime">Длительность оказания услуги (в минутах)</label>
-        <input name="long_time" type="number" class="form-control" id="inputLongTime" placeholder="">
-    </div>
-    <div id="times">    
-        <div class="form-group row">
-            <label for="example-time-input" class="col-2 col-form-label">Time</label>
-            <div class="col-10">
-                <input class="form-control" type="time" value="13:45" id="inputTime1">
+        </select>
+        <div class="form-group">
+            <label for="inputDescription">Описание услуги</label>
+            <textarea name="description" class="form-control" id="inputDescription" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="inputAddress">Цена в рублях</label>
+            <input name="price" type="number" class="form-control" id="inputPrice" placeholder="">
+        </div>
+        <div class="form-group">
+            <label for="inputLongTime">Длительность оказания услуги (в минутах)</label>
+            <input name="long_time" type="number" class="form-control" id="inputLongTime" placeholder="">
+        </div>
+        <h4>Временные слоты</h4>
+        <div id="times">
+            <div class="form-group" style="display: flex; justify-content: space-between;">
+                <div class="mt-2">
+                    <label>Понедельник</label>
+                    <div id="timesMonday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeMonday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeMonday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label>Вторник</label>
+                    <div id="timesTuesday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeTuesday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeTuesday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label>Среда</label>
+                    <div id="timesWednesday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeWednesday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeWednesday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label>Четверг</label>
+                    <div id="timesThursday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeThursday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeThursday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label>Пятница</label>
+                    <div id="timesFriday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeFriday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeFriday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label>Суббота</label>
+                    <div id="timesSaturday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeSaturday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeSaturday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label>Воскресенье</label>
+                    <div id="timesSunday">
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6"><button type="button" id="addTimeSunday" class="btn btn-primary col-12"><i class="fas fa-plus"></i></button></div>
+                        <div class="col-6"><button type="button" id="cancelTimeSunday" class="btn btn-danger col-12"><i class="fas fa-minus"></i></button></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-2"></div>
-        <div class="col-5"><button type="button" id="addTime" class="btn btn-primary col-12">Добавить время оказания услуги</button></div>
-        <div class="col-5"><button type="button" id="cancelTime" class="btn btn-danger col-12">Отменить последние</button></div>
-    </div>
-    <div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="Monday">Понедельник
-            </label>
+        <div class="form-group row">
+            <label for="example-date-input" class="col-2 col-form-label">Дата, до которой возможна запись</label>
+            <div class="col-10">
+                <input id="inputDate" class="form-control" type="date">
+            </div>
         </div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="Tuesday">Вторник
-            </label>
+        <div class="form-group row">
+            <label for="example-date-input" class="col-2 col-form-label">Отметьте нерабочие дни</label>
+            <div class="col-10">
+                <input type="text" id="daysOff" class="form-control date" placeholder="Отметьте нерабочие дни">
+            </div>
         </div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="Wednesday">Среда
-            </label>
-        </div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox4" value="Thursday">Четверг
-            </label>
-        </div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox5" value="Friday">Пятница
-            </label>
-        </div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox6" value="Saturday">Суббота
-            </label>
-        </div>
-        <div class="form-check form-check-inline">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox7" value="Sunday">Воскресенье
-            </label>
-        </div>
-    </div>
-    <button type="submit" id="addService" class="btn btn-primary mt-3">Добавить услугу</button>
-</form>
-
+        <button type="submit" id="addService" class="btn btn-primary mt-3">Добавить услугу</button>
+    </form>
+    
 <script>
-    var times = document.getElementById('times');
-    var countTimes = 1;
-
-    var cancelTimeButton = document.getElementById('cancelTime');
-    cancelTimeButton.addEventListener('click', function () {
-        if (countTimes > 1) {
-            document.getElementById('inputTimeBlock' + countTimes).remove();
-            countTimes--;
-        }
+    $('.date').datepicker({
+        multidate: true,
+        format: 'dd-mm-yyyy',
+        monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+        dayNamesMin: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
     });
+    var countTimes = new Map();
+    countTimes.set("Monday", 0);
+    countTimes.set("Tuesday", 0);
+    countTimes.set("Wednesday", 0);
+    countTimes.set("Thursday", 0);
+    countTimes.set("Friday", 0);
+    countTimes.set("Saturday", 0);
+    countTimes.set("Sunday", 0);
 
-    var addTimeButton = document.getElementById('addTime');
-    addTimeButton.addEventListener('click', function () {
-        countTimes++;
-        var div = document.createElement('div');
-        div.innerHTML = '<div id="inputTimeBlock' + countTimes + '" class="form-group row">' +
-            '<div class="col-2"></div>' +
-            '<div class="col-10">' +
-            '<input class="form-control" type="time" value="13:45" id="inputTime' + countTimes + '">' +
-            '</div>' +
-            '</div>';
-        times.appendChild(div);
-    });
+    function addTimeManipulating(day)
+    {
+        var times = document.getElementById('times' + day);
+        var cancelTimeButton = document.getElementById('cancelTime' + day);
+        cancelTimeButton.addEventListener('click', function () {
+            if (countTimes.get(day) > 0) {
+                document.getElementById('inputTimeBlock' + day + countTimes.get(day)).remove();
+                countTimes.set(day, countTimes.get(day) - 1);
+            }
+        });
+
+        var addTimeButton = document.getElementById('addTime' + day);
+        addTimeButton.addEventListener('click', function () {
+            countTimes.set(day, countTimes.get(day) + 1);
+            var div = document.createElement('div');
+            div.innerHTML = '<input class="form-control mt-2" type="time" value="13:45" id="inputTime' + day + countTimes.get(day) + '">';
+            div.id = "inputTimeBlock" + day + countTimes.get(day);
+            times.appendChild(div);
+        });
+    }
+
+    addTimeManipulating("Monday");
+    addTimeManipulating("Tuesday");
+    addTimeManipulating("Wednesday");
+    addTimeManipulating("Thursday");
+    addTimeManipulating("Friday");
+    addTimeManipulating("Saturday");
+    addTimeManipulating("Sunday");
 
     document.getElementById('addService').addEventListener('click', e => {
         e.preventDefault();
         addService();
     });
+
+    function getTimes(day) {
+        var times = [];
+        for (var i = 1; i <= countTimes.get(day); i++) {
+            times.push(document.getElementById("inputTime" + day + i).value);
+        }
+        return {
+            day: day,
+            times: times
+        };
+    }
+
     async function addService() {
 
         // получаем данные формы и фомируем объект для отправки
@@ -120,30 +182,32 @@
         formData.append("address", document.getElementById("inputAddress").value);
         formData.append("price", document.getElementById("inputPrice").value);
         formData.append("long_time", document.getElementById("inputLongTime").value);
+        formData.append("end_date", document.getElementById("inputDate").value)
+        formData.append("days_off", document.getElementById("daysOff").value)
 
-        var timesList = '';
-        for (var i = 1; i <= countTimes; i++) {
-            timesList += document.getElementById('inputTime' + i.toString()).value.toString() + ';';
-        }
-        formData.append("times", timesList);
+        var daysTimes = [];
+        daysTimes.push(getTimes("Monday"));
+        daysTimes.push(getTimes("Tuesday"));
+        daysTimes.push(getTimes("Wednesday"));
+        daysTimes.push(getTimes("Thursday"));
+        daysTimes.push(getTimes("Friday"));
+        daysTimes.push(getTimes("Saturday"));
+        daysTimes.push(getTimes("Sunday"));
 
-        var days = '';
-        for (var i = 1; i < 8; i++) {
-            var item = document.getElementById('inlineCheckbox' + i);
-            if (item.checked)
-                days += item.value + ';';
-        }
-        formData.append("days", days);
+        var addr = {
+            "daysTimes": daysTimes
+        };
+        formData.append("days_times", JSON.stringify(addr));
 
 
         // отправляет запрос и получаем ответ
         const response = await fetch("/Company/AddService", {
-        method: "POST",
-            headers: {"Accept": "application/json" },
+            method: "POST",
+            headers: { "Accept": "application/json" },
             body: formData
         });
         // получаем данные
-        const data = await response.json(); 
+        const data = await response.json();
 
         // если запрос прошел нормально
         if (response.ok) {
@@ -154,8 +218,8 @@
             }
         }
         else {
-        // если произошла ошибка, из errorText получаем текст ошибки
-        console.log("Error: ", response.status, data.errorText);
+            // если произошла ошибка, из errorText получаем текст ошибки
+            console.log("Error: ", response.status, data.errorText);
         }
     };
 </script>

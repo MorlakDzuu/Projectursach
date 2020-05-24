@@ -10,5 +10,7 @@ namespace Project.Models
         public int Id { get; set; }
         public int Service_id { get; set; }
         public string Time { get; set; }
+        public string Day { get; set; }
+        public string Status { get; set; }
     }
 }

@@ -16,5 +16,7 @@ namespace Project.Outputs
         public string Address { get; set; }
         public string[] Days { get; set; }
         public string[] Times { get; set; }
+        public string[] DaysOff { get; set; }
+        public string EndDate { get; set; }
     }
 }

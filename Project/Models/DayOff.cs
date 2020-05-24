@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace Project.Models
 {
-    public class Service_to_day
+    public class DayOff
     {
         public int Id { get; set; }
         public int Service_id { get; set; }
-        public string Day { get; set; }
+        public string Date { get; set; }
     }
 }

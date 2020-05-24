@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using Project.Outputs;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Project.Json;
+using Project.Inputs;
 
 namespace Project.Services
 {
@@ -104,39 +106,31 @@ namespace Project.Services
             }
         }
 
-        public void UpdateCompany(int id, string name, string phone, string email, string[] address, string description, string pic)
+        public List<Company_to_address> GetAddressesByCompanyId(int id)
+        {
+            return db.Company_to_address.Where(item => item.Company_id == id).ToList();
+        }
+
+        public void UpdateCompany(int id, string name, string phone, string email, List<Address> addresses, string description, string pic)
         {
             CompanyOutput oldCompanyOut = GetCompanyById(id);
-            Company oldCompany = new Company
-            {
-                Id = oldCompanyOut.Id,
-                Name = oldCompanyOut.Name,
-                Email = oldCompanyOut.Email,
-                Phone = oldCompanyOut.Phone,
-                Description = oldCompanyOut.Description,
-                PasswordHash = oldCompanyOut.PasswordHash,
-                Pic = oldCompanyOut.Pic,
-                Role = oldCompanyOut.Role
-            };
+            Company oldCompany = db.Companies.Find(id);
             Company company = new Company { Id = id, Name = name, Phone = phone, Email = email, Description = description, Pic = pic, PasswordHash = oldCompanyOut.PasswordHash, Role = oldCompanyOut.Role };
-            List<string> addresses = db.Company_to_address.Where(item => item.Company_id == id).Select(item => item.Address).ToList();
-            foreach (string item in address.ToList())
+            //List<string> addresses = db.Company_to_address.Where(item => item.Company_id == id).Select(item => item.Address).ToList();
+            db.Entry(oldCompany).State = EntityState.Detached;
+            db.Companies.Update(company);
+            db.SaveChanges();
+            foreach (Address item in addresses)
             {
-                if (addresses.Contains(item))
+                if (item.Id != 0)
                 {
-                    addresses.Remove(item);
+                    db.Company_to_address.Update(new Company_to_address { Id = item.Id, Address = item.Value, Company_id = id});
                 }
                 else
                 {
-                    db.Company_to_address.Add(new Company_to_address { Company_id = id, Address = item });
+                    db.Company_to_address.Add(new Company_to_address { Company_id = id, Address = item.Value });
                 }
             }
-            foreach (string item in addresses)
-            {
-                db.Company_to_address.Remove(db.Company_to_address.Where(i => i.Company_id == id & i.Address == item).ToList()[0]);
-            }
-            db.Entry(oldCompany).State = EntityState.Detached;
-            db.Companies.Update(company);
             db.SaveChanges();
         }
 
@@ -209,7 +203,7 @@ namespace Project.Services
 
 
         // Service queries
-        public void AddService(string name, int price, string description, string address, int company_id, string[] days, int long_time, string[] times)
+        public void AddService(string name, int price, string description, string address, int company_id, List<DayTimes> daysTimes, int long_time, string endDate, List<string> datesOff)
         {
             int addressId = db.Company_to_address.Where(item => item.Company_id == company_id & item.Address.Equals(address)).ToList()[0].Id;
             Service service = new Service { 
@@ -218,23 +212,27 @@ namespace Project.Services
                 Description = description, 
                 Company_id = company_id, 
                 Long_time = long_time, 
-                Address_id = addressId
+                Address_id = addressId,
+                EndDate = endDate
             };
             db.Services.Add(service);
             db.SaveChanges();
             int serviceId = db.Services.Where(item => item.Name.Equals(name) && item.Price == price && item.Description.Equals(description) && item.Company_id == company_id && item.Long_time == long_time && item.Address_id == addressId).ToList()[0].Id;
-            foreach (string day in days.ToList())
+            foreach (DayTimes dayTimes in daysTimes)
             {
-                db.Service_to_day.Add(new Service_to_day { Service_id = serviceId, Day = day });
+                foreach (String time in dayTimes.Times)
+                {
+                    db.Service_to_time.Add(new Service_to_time { Service_id = serviceId, Day = dayTimes.Day, Time = time, Status = "new" });
+                }
             }
-            foreach (string time in times.ToList())
+            foreach (string date in datesOff)
             {
-                db.Service_to_time.Add(new Service_to_time { Service_id = serviceId, Time = time });
+                db.Days_off.Add(new DayOff { Service_id = serviceId, Date = date });
             }
             db.SaveChanges();
         }
 
-        public void UpdateService(int id, string name, int price, string description, string address, int company_id, string[] days, int long_time, string[] times)
+        public void UpdateService(int id, string name, int price, string description, string address, int company_id, List<DayTimes> daysTimes, int long_time, string endDate, List<string> datesOff)
         {
             Service service = new Service
             {
@@ -244,46 +242,82 @@ namespace Project.Services
                 Description = description,
                 Company_id = company_id,
                 Long_time = long_time,
-                Address_id = db.Company_to_address.Where(item => item.Company_id == company_id & item.Address.Equals(address)).ToList()[0].Id
+                Address_id = db.Company_to_address.Where(item => item.Company_id == company_id & item.Address.Equals(address)).ToList()[0].Id,
+                EndDate = endDate
             };
             db.Services.Update(service);
             db.SaveChanges();
-
-            List<string> oldDays = db.Service_to_day.Where(item => item.Service_id == id).Select(item => item.Day).ToList();
-            foreach (string day in days.ToList())
+            List<string> oldDatesOff = db.Days_off.Where(item => item.Service_id == id).Select(item => item.Date).ToList();
+            foreach (string date in datesOff)
             {
-                if (oldDays.Contains(day))
+                if (!oldDatesOff.Contains(date))
                 {
-                    oldDays.Remove(day);
+                    db.Days_off.Add(new DayOff { Service_id = id, Date = date });
                 } else
                 {
-                    db.Service_to_day.Add(new Service_to_day { Service_id = id, Day = day });
+                    oldDatesOff.Remove(date);
                 }
             }
-            foreach (string day in oldDays)
+            foreach (string date in oldDatesOff)
             {
-                db.Service_to_day.Remove(db.Service_to_day.Where(item => item.Service_id == id & item.Day.Equals(day)).ToList()[0]);
+                db.Days_off.Remove(db.Days_off.Where(item => item.Service_id == id && item.Date.Equals(date)).ToList()[0]);
             }
 
-            List<string> oldTimes = db.Service_to_time.Where(item => item.Service_id == id).Select(item => item.Time).ToList();
-            foreach (string time in times.ToList())
+            List<DayTimes> dayTimesLast = daysTimes.ToList();
+            foreach (DayTimes dayTimes in daysTimes)
             {
-                if (oldTimes.Contains(time))
+                List<Service_to_time> servicesByDay = db.Service_to_time.Where(item => item.Service_id == id && item.Day.Equals(dayTimes.Day)).ToList();
+                foreach (Service_to_time service_To_Time in servicesByDay)
                 {
-                    oldTimes.Remove(time);
+                    if (dayTimes.Times.Contains(service_To_Time.Time))
+                    {
+                        if (service_To_Time.Status.Equals("old"))
+                        {
+                            db.Entry(service_To_Time).State = EntityState.Detached;
+                            db.Service_to_time.Update(new Service_to_time { Id = service_To_Time.Id, Service_id = id, Day = service_To_Time.Day, Time = service_To_Time.Time, Status = "new" });
+                        }
+                        dayTimesLast[daysTimes.IndexOf(dayTimes)].Times.Remove(service_To_Time.Time);
+                    } else
+                    {
+                        db.Entry(service_To_Time).State = EntityState.Detached;
+                        db.Service_to_time.Update(new Service_to_time { Id = service_To_Time.Id, Service_id = id, Day = service_To_Time.Day, Time = service_To_Time.Time, Status = "old" });
+                    }
                 }
-                else
+                foreach (string time in dayTimesLast[daysTimes.IndexOf(dayTimes)].Times)
                 {
-                    db.Service_to_time.Add(new Service_to_time { Service_id = id, Time = time});
+                    db.Service_to_time.Add(new Service_to_time { Service_id = id, Day = dayTimes.Day, Time = time, Status = "new" });
                 }
-            }
-            foreach (string time in oldTimes)
-            {
-                db.Service_to_time.Remove(db.Service_to_time.Where(item => item.Service_id == id & item.Time.Equals(time)).ToList()[0]);
             }
             db.SaveChanges();
         }
 
+        public List<DayOff> GetDaysOffByServiceId(int id)
+        {
+            return db.Days_off.Where(item => item.Service_id == id).ToList();
+        }
+
+        public List<DayTimes> GetDaysTimesByServiceId(int id)
+        {
+            List<DayTimes> dayTimes = new List<DayTimes> { };
+            List<Service_to_time> service_To_Times = db.Service_to_time.Where(item => item.Service_id == id && item.Status.Equals("new")).ToList();
+            foreach (Service_to_time service_To_Time in service_To_Times)
+            {
+                List<DayTimes> dayTimesByDay = dayTimes.Where(item => item.Day.Equals(service_To_Time.Day)).ToList();
+                if (dayTimesByDay.Count > 0)
+                {
+                    dayTimes[dayTimes.IndexOf(dayTimesByDay[0])].Times.Add(service_To_Time.Time);
+                } else
+                {
+                    DayTimes newDayTimes = new DayTimes();
+                    newDayTimes.Day = service_To_Time.Day;
+                    newDayTimes.Times = new List<string> { service_To_Time.Time };
+                    dayTimes.Add(newDayTimes);
+                }
+            }
+            return dayTimes;
+        }
+
+        // TODO: доработать
         public ServiceOutput GetServiceById(int id)
         {
             Service service = db.Services.Find(id);
@@ -297,8 +331,10 @@ namespace Project.Services
                     Long_time = service.Long_time,
                     Price = service.Price,
                     Address = db.Company_to_address.Find(service.Address_id).Address,
-                    Days = db.Service_to_day.Where(item => item.Service_id == service.Id).Select(item => item.Day).ToArray(),
-                    Times = db.Service_to_time.Where(item => item.Service_id == service.Id).Select(item => item.Time).ToArray()
+                    Days = db.Service_to_time.Where(item => item.Service_id == service.Id && item.Status.Equals("new")).Select(item => item.Day).Distinct().ToArray(),
+                    Times = db.Service_to_time.Where(item => item.Service_id == service.Id && item.Status.Equals("new")).Select(item => item.Time).ToArray(),
+                    DaysOff = db.Days_off.Where(item => item.Service_id == service.Id).Select(item => item.Date).ToArray(),
+                    EndDate = service.EndDate   
                 };
                 return serviceOut;
             }
@@ -326,7 +362,7 @@ namespace Project.Services
         // Records queries
         public int AddRecord(int user_id, int service_id, string address, string time, string date)
         {
-            int timeId = db.Service_to_time.Where(item => item.Service_id == service_id & item.Time.Equals(time)).ToList()[0].Id;
+            int timeId = db.Service_to_time.Where(item => item.Service_id == service_id && item.Time.Equals(time) && item.Status.Equals("new")).ToList()[0].Id;
             Record record = new Record { User_id = user_id, Service_id = service_id, Time_id = timeId, Status = "new", Date = date };
             db.Records.Add(record);
             db.SaveChanges();
@@ -379,8 +415,9 @@ namespace Project.Services
         public List<string> GetTimesByDateAndServiceId(string date, int id)
         {
             string dateCompare = DateTime.Parse(date).ToString("yyyy-MM-dd");
+            string dayOfWeek = DateTime.Parse(date).DayOfWeek.ToString();
             List<Record> records = db.Records.Where(r => r.Date.Equals(dateCompare) && r.Service_id == id && r.Status.Equals("new")).ToList();
-            List<string> allTimes = GetServiceById(id).Times.ToList();
+            List<string> allTimes = db.Service_to_time.Where(item => item.Service_id == id && item.Day.Equals(dayOfWeek) && item.Status.Equals("new")).Select(item => item.Time).ToList();
             List<string> times = new List<string> { };
             foreach (Record record in records)
             {
@@ -592,53 +629,59 @@ namespace Project.Services
 
         public RecordOutputClient GetRecordOutputByRecordId(int id)
         {
-            return db.Records.Join(db.Services,
-                  r => r.Service_id,
-                  s => s.Id,
-                  (r, s) => new
-                  {
-                      RecordId = r.Id,
-                      Address_id = s.Address_id,
-                      Company_id = s.Company_id,
-                      ServiceName = s.Name,
-                      Time_id = r.Time_id,
-                      Name = s.Name,
-                      Date = r.Date
+            try
+            {
+                return db.Records.Join(db.Services,
+                      r => r.Service_id,
+                      s => s.Id,
+                      (r, s) => new
+                      {
+                          RecordId = r.Id,
+                          Address_id = s.Address_id,
+                          Company_id = s.Company_id,
+                          ServiceName = s.Name,
+                          Time_id = r.Time_id,
+                          Name = s.Name,
+                          Date = r.Date
 
-                  })
-                  .Where(temp => temp.RecordId == id)
-                  .Join(db.Company_to_address,
-                  temp => temp.Address_id,
-                  ca => ca.Id,
-                  (temp, ca) => new
-                  {
-                      RecordId = temp.RecordId,
-                      Company_id = temp.Company_id,
-                      Address = ca.Address,
-                      Name = temp.Name,
-                      ServiceName = temp.ServiceName,
-                      Date = temp.Date,
-                      Time_id = temp.Time_id
-                  })
-                  .Join(db.Service_to_time,
-                  temp => temp.Time_id,
-                  st => st.Id,
-                  (temp, st) => new
-                  {
-                      RecordId = temp.RecordId,
-                      Company_id = temp.Company_id,
-                      Address = temp.Address,
-                      Name = temp.Name,
-                      ServiceName = temp.ServiceName,
-                      Date = temp.Date,
-                      Time = st.Time
-                  })
-                  .Join(db.Companies,
-                  temp => temp.Company_id,
-                  c => c.Id,
-                  (temp, c) => new RecordOutputClient(temp.RecordId, c.Name, temp.ServiceName, temp.Date, temp.Time, temp.Address))
-                  .Distinct()
-                  .ToList()[0];
+                      })
+                      .Where(temp => temp.RecordId == id)
+                      .Join(db.Company_to_address,
+                      temp => temp.Address_id,
+                      ca => ca.Id,
+                      (temp, ca) => new
+                      {
+                          RecordId = temp.RecordId,
+                          Company_id = temp.Company_id,
+                          Address = ca.Address,
+                          Name = temp.Name,
+                          ServiceName = temp.ServiceName,
+                          Date = temp.Date,
+                          Time_id = temp.Time_id
+                      })
+                      .Join(db.Service_to_time,
+                      temp => temp.Time_id,
+                      st => st.Id,
+                      (temp, st) => new
+                      {
+                          RecordId = temp.RecordId,
+                          Company_id = temp.Company_id,
+                          Address = temp.Address,
+                          Name = temp.Name,
+                          ServiceName = temp.ServiceName,
+                          Date = temp.Date,
+                          Time = st.Time
+                      })
+                      .Join(db.Companies,
+                      temp => temp.Company_id,
+                      c => c.Id,
+                      (temp, c) => new RecordOutputClient(temp.RecordId, c.Name, temp.ServiceName, temp.Date, temp.Time, temp.Address))
+                      .Distinct()
+                      .ToList()[0];
+            } catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

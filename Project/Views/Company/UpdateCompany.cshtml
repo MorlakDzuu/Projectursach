@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "UpdateCompany";
     Project.Outputs.CompanyOutput company = ViewBag.Company;
+    List<Company_to_address> addresses = ViewBag.Addresses;
 }
 
 <form>
@@ -19,7 +20,7 @@
     </div>
     <div id="addresses">
         @{
-            for (int i = 1; i <= company.Address.Length; i++)
+            for (int i = 1; i <= addresses.Count; i++)
             {
                 <div id="inputAddressBlock @i">
                     <div class="form-group">
@@ -29,7 +30,8 @@
                                 <label for="inputAddress 1">Адреса</label>
                             }
                         }
-                        <input name="address" type="text" class="form-control" id="inputAddress @i" placeholder="Проспект Ленина дом 8" value="@company.Address[i-1]">
+                        <input name="address" type="text" class="form-control" id="inputAddress @i" placeholder="Проспект Ленина дом 8" value="@addresses[i-1].Address">
+                        <input id="inputAddressId @i" value="@addresses[i-1].Id" hidden/>
                     </div>
                 </div>
             }
@@ -50,7 +52,7 @@
     <button type="submit" id="submitButton" class="btn btn-primary mt-3">Отправить</button>
 </form>
 <script>
-    var countAddress = 1;
+    var countAddress = @addresses.Count;
     var addTimeButton = document.getElementById('addAddress');
     var times = document.getElementById('addresses');
 
@@ -60,6 +62,7 @@
         div.id = "inputAddressBlock " + countAddress;
         div.innerHTML = '<div class="form-group">' +
             '<input name="address" type="text" class="form-control" id="inputAddress ' + countAddress + '" placeholder="1234 Main St">' +
+            '<input id="inputAddressId ' + countAddress + '" value="0" />' + 
             '</div>';
         times.appendChild(div);
     });
@@ -88,12 +91,19 @@
         formData.append("description", document.getElementById("inputDescription").value);
         formData.append("pic", document.getElementById("customFile").files[0]);
 
-        var addresses = '';
+        var addresses = [];
         for (var i = 1; i <= countAddress; i++) {
-            addresses += document.getElementById('inputAddress ' + i).value + ';';
+            addresses.push(
+                {
+                    id: document.getElementById('inputAddressId ' + i).value,
+                    value: document.getElementById('inputAddress ' + i).value
+                }
+            );
         }
-
-        formData.append("address", addresses);
+        var addr = {
+            "addresses": addresses
+        };
+        formData.append("address", JSON.stringify(addr));
 
 
         // отправляет запрос и получаем ответ

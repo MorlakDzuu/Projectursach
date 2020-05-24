@@ -13,8 +13,8 @@ namespace Project.Context
         public DbSet<Company> Companies { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Record> Records { get; set; }
+        public DbSet<DayOff> Days_off { get; set; }
         public DbSet<Company_to_address> Company_to_address { get; set; }
-        public DbSet<Service_to_day> Service_to_day { get; set; }
         public DbSet<Service_to_time> Service_to_time { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

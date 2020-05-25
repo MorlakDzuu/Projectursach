@@ -9,7 +9,7 @@
 <form method="post" action="/register" enctype="multipart/form-data">
     <div class="form-group">
         <label for="inputName">Название</label>
-        <input name="name" type="text" class="form-control" id="inputName" placeholder="Service name" value="@service.Name">
+        <input name="name" type="text" class="form-control" id="inputName" placeholder="Название услуги" value="@service.Name">
     </div>
     <select id="inputAddress" name="address" class="custom-select mr-sm-2">
         @{
@@ -173,7 +173,7 @@
             <input type="text" id="daysOff" class="form-control date" placeholder="Отметьте нерабочие дни" value="@datesOff">
         </div>
     </div>
-    <button type="submit" id="addService" class="btn btn-primary mt-3">Добавить услугу</button>
+    <button type="submit" id="addService" class="btn btn-success mt-3">Сохранить изменения</button>
 </form>
 
 <script>
